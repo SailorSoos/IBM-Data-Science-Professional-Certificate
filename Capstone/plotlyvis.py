@@ -1,4 +1,117 @@
-#get this from end of week 3 after the folium set
+import pandas as pd
+import dash
+from dash import html
+from dash import dcc
+from dash.dependencies import Input, Output
+import plotly.express as px
+
+#not the local root directory when pushing script to github, redirect to suit
+spacex_df = pd.read_csv('c:/Users/peters/Downloads/spacex_launch_dash.csv')
+max_payload = spacex_df['Payload Mass (kg)'].max()
+min_payload = spacex_df['Payload Mass (kg)'].min()
+
+
+app = dash.Dash(__name__)
+server = app.server
+
+uniquelaunchsites = spacex_df['Launch Site'].unique().tolist()
+lsites = []
+lsites.append({'label': 'All Sites', 'value': 'All Sites'})
+for site in uniquelaunchsites:
+ lsites.append({'label': site, 'value': site})
 
 
 
+app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
+                                        style={'textAlign': 'center', 'color': '#503D36',
+                                               'font-size': 40}),
+
+
+
+
+                                dcc.Dropdown(id='site_dropdown',options=lsites,placeholder='Select a Launch Site', searchable = True , value = 'All Sites'),
+                                html.Br(),
+
+
+                                html.Div(dcc.Graph(id='success-pie-chart')),
+                                html.Br(),
+
+                                html.P("Payload range (Kg):"),
+
+                                dcc.RangeSlider(
+                                    id='payload_slider',
+                                    min=0,
+                                    max=10000,
+                                    step=1000,
+                                    marks = {
+                                            0: '0 kg',
+                                            500: '500',
+                                            1000: '1000',
+                                            1500: '1500',
+                                            2000: '2000',
+                                            2500: '2500',
+                                            3000: '3000',
+                                            3500: '3500',
+                                            4000: '4000',
+                                            4500: '4500',
+                                            5000: '5000',
+                                            5500: '5500',
+                                            6000: '6000',
+                                            6500: '6500',
+                                            7000: '7000',
+                                            7500: '7500',
+                                            8000: '8000',
+                                            8500: '8500',
+                                            9000: '9000',
+                                            9500: '9500',
+                                            10000: '10000'
+                                    },
+
+                                    value=[min_payload,max_payload]
+                                ),
+
+                                html.Div(dcc.Graph(id='success-payload-scatter-chart')),
+
+                                ])
+
+@app.callback(
+     Output(component_id='success-pie-chart', component_property='figure'),
+     [Input(component_id='site_dropdown', component_property='value')]
+)
+def update_graph(site_dropdown):
+    if (site_dropdown == 'All Sites'):
+        df  = spacex_df[spacex_df['class'] == 1]
+        fig = px.pie(df, names='Launch Site', hole=.3, title='Total Success Launches By all sites')
+    else:
+        df  = spacex_df.loc[spacex_df['Launch Site'] == site_dropdown]
+        fig = px.pie(df, names='class', hole=.3, title='Total Success Launches for site' + site_dropdown)
+    return fig
+
+@app.callback(
+     Output(component_id='success-payload-scatter-chart', component_property='figure'),
+     [Input(component_id='site_dropdown', component_property='value'),
+     Input(component_id="payload_slider", component_property="value")]
+)
+def update_scattergraph(site_dropdown, payload_slider):
+    if site_dropdown == 'All Sites':
+        low, high = payload_slider
+        df  = spacex_df
+        mask = (df['Payload Mass (kg)'] > low) & (df['Payload Mass (kg)'] < high)
+        fig = px.scatter(
+            df[mask], x="Payload Mass (kg)", y="class",
+            color="Booster Version",
+            size='Payload Mass (kg)',
+            hover_data=['Payload Mass (kg)'])
+    else:
+        low, high = payload_slider
+        df  = spacex_df.loc[spacex_df['Launch Site'] == site_dropdown]
+        mask = (df['Payload Mass (kg)'] > low) & (df['Payload Mass (kg)'] < high)
+        fig = px.scatter(
+            df[mask], x="Payload Mass (kg)", y="class",
+            color="Booster Version",
+            size='Payload Mass (kg)',
+            hover_data=['Payload Mass (kg)'])
+    return fig
+
+if __name__ == '__main__':
+    app.run_server(host="0.0.0.0",port="3000",debug=False)
