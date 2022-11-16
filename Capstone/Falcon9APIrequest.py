@@ -141,7 +141,7 @@ data_falcon9.isnull().sum()
 meanPayloadMass = data_falcon9['PayloadMass'].mean()
 data_falcon9['PayloadMass'] = data_falcon9['PayloadMass'].fillna(meanPayloadMass)
 
-data_falcon9.to_csv('c:\\Users\peters\Documents\Data Science Professional Certificate\IBM-Data-Science-Professional-Certificate\Capstone\dataset_part_1.csv', index=False)
+data_falcon9.to_csv('c:\\Users\peters\Downloads\dataset_part_1.csv', index=False)
 
 print("Done!")
 
