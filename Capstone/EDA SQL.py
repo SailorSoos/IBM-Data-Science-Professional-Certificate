@@ -11,7 +11,6 @@ db = ss.sqlserver('localhost','1433','SpaceX','admin','admin')
 db.GetRecordsOfColumn('select DISTINCT Launch_Site from tblSpaceX','Launch_Site')
 
 #2 display 5 records where launch sites begin with the string 'CCA'
-
 conn = pyodbc.connect('Driver={SQL Server};'
                                   'Server=localhost;'
                                   'Database=SpaceX;'
@@ -25,19 +24,19 @@ for row in cursor.fetchall():
      results.append(dict(zip(columns, row)))
 
 df = pd.DataFrame.from_dict(results)
-df
+print(df)
 
 #3 display the total payload mass carried by booster launched by nasa
 TPM = db.GetRecordsOfColumn("select SUM(PAYLOAD_MASS_KG_) TotalPayloadMass from tblSpaceX where Customer = 'NASA (CRS)'",'TotalPayloadMass')
 ndf= pd.DataFrame(TPM)
 ndf.columns = ['Total Payload Mass']
-ndf
+print(ndf)
 
 #4 display average payload mass carried by booster version f9 v1.1
 APM = db.GetRecordsOfColumn("select AVG(PAYLOAD_MASS_KG_) AveragePayloadMass from tblSpaceX where Booster_Version = 'F9 v1.1'",'AveragePayloadMass')
 ndf= pd.DataFrame(APM)
 ndf.columns = ['Average Payload Mass']
-ndf
+print(ndf)
 
 #5 list the date when the first successful landing outcome in ground pad was achieved
 SLO = db.GetRecordsOfColumn("select MIN(Date) SLO from tblSpaceX where Landing_Outcome = 'Success (drone ship)'",'SLO')
@@ -52,12 +51,6 @@ ndf.columns = ['Date which first Successful landing outcome in drone ship was ac
 print(ndf)
 
 #7 list the total numer of successful and failure mission outcomes
-conn = pyodbc.connect('Driver={SQL Server};'
-                                  'Server=localhost;'
-                                  'Database=SpaceX;'
-                                  'User ID=admin;Password=admin;')
-cursor = conn.cursor()
-
 cursor.execute("SELECT(SELECT Count(Mission_Outcome) from tblSpaceX where Mission_Outcome LIKE '%Success%') as Successful_Mission_Outcomes,(SELECT Count(Mission_Outcome) from tblSpaceX where Mission_Outcome LIKE '%Failure%') as Failure_Mission_Outcomes")
 columns = [column[0] for column in cursor.description]
 results = []
@@ -68,12 +61,6 @@ df = pd.DataFrame.from_dict(results)
 print(df)
 
 #8 list the names of the booster_versions which have carried the maximum payload mass. Use a subquery
-conn = pyodbc.connect('Driver={SQL Server};'
-                                  'Server=localhost;'
-                                  'Database=SpaceX;'
-                                  'User ID=admin;Password=admin;')
-cursor = conn.cursor()
-
 cursor.execute("SELECT DISTINCT Booster_Version, MAX(PAYLOAD_MASS_KG_) AS [Maximum Payload Mass] FROM tblSpaceX GROUP BY Booster_Version ORDER BY [Maximum Payload Mass] DESC")
 columns = [column[0] for column in cursor.description]
 results = []
@@ -84,12 +71,6 @@ df = pd.DataFrame.from_dict(results)
 print(df)
 
 #9 list the failed landing_outcomes in drone ship, thier booster versions, and launch site names for in year 2015
-conn = pyodbc.connect('Driver={SQL Server};'
-                                  'Server=localhost;'
-                                  'Database=SpaceX;'
-                                  'User ID=admin;Password=admin;')
-cursor = conn.cursor()
-
 cursor.execute("SELECT   DateName( month , DateAdd( month , MONTH(CONVERT(date,Date, 105)) , 0 ) - 1 )  as Month, Booster_Version, Launch_Site, Landing_Outcome FROM tblSpaceX WHERE  (Landing_Outcome LIKE N'%Success%') AND YEAR(CONVERT(date,Date, 105)) = '2015'")
 columns = [column[0] for column in cursor.description]
 results = []
