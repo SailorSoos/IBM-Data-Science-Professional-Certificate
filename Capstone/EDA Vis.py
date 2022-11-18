@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 df = pd.read_csv('c:/Users/peters/Downloads/dataset_part_2.csv')
-
 print(df.head(5))
 
 #exploring to see if anything is correlated
@@ -69,7 +68,6 @@ plt.ylabel("Success Rate",fontsize=20)
 plt.show()
 
 
-#----------
 #by now yoyu should obtain some preliminary insights about how each important ariable would affect the success rate,
 #we will select the features that will be used in the success prediction in the future module
 features = df[['FlightNumber', 'PayloadMass', 'Orbit', 'LaunchSite', 'Flights', 'GridFins', 'Reused', 'Legs', 'LandingPad', 'Block', 'ReusedCount', 'Serial']]

@@ -26,8 +26,7 @@ def plot_confusion_matrix(y,y_predict):
 data = pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DS0701EN-SkillsNetwork/api/dataset_part_2.csv')
 X = pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DS0701EN-SkillsNetwork/api/dataset_part_3.csv')
 
-#print(data.head())
-#print(X.head(100))
+score = []
 #1
 Y = data['Class'].to_numpy() 
 
@@ -40,7 +39,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 
 print(Y_test.shape)
 
-#4
+#4 logistic regression
 parameters ={'C':[0.01,0.1,1],
              'penalty':['l2'],
              'solver':['lbfgs']}
@@ -52,10 +51,12 @@ logreg_cv = gscv.fit(X_train,Y_train)
 
 print("tuned hpyerparameters :(best parameters) ",logreg_cv.best_params_)
 print("accuracy :",logreg_cv.best_score_)
+#score["Type"].append("LR")
+score.append(logreg_cv.best_score_)
 
 #5 
 yhat=logreg_cv.predict(X_test)
-plot_confusion_matrix(Y_test,yhat)
+#plot_confusion_matrix(Y_test,yhat)
 
 #6
 parameters = {'kernel':('linear', 'rbf','poly','rbf', 'sigmoid'),
@@ -67,6 +68,8 @@ svm_cv = gscv.fit(X_train,Y_train)
 
 print("tuned hpyerparameters :(best parameters) ",svm_cv.best_params_)
 print("accuracy :",svm_cv.best_score_)
+#score["Type"].append("SVM")
+score.append(svm_cv.best_score_)
 
 #7
 print("accuracy: ",svm_cv.score(X_test,Y_test))
@@ -90,6 +93,8 @@ tree_cv = gscv.fit(X_train,Y_train)
 
 print("tuned hpyerparameters :(best parameters) ",tree_cv.best_params_)
 print("accuracy :",tree_cv.best_score_)
+#score["Type"].append("Tree")
+score.append(tree_cv.best_score_)
 
 #9
 print("accuracy: ",tree_cv.score(X_test,Y_test))
@@ -110,6 +115,7 @@ knn_cv = gscv.fit(X_train,Y_train)
 
 print("tuned hpyerparameters :(best parameters) ",knn_cv.best_params_)
 print("accuracy :",knn_cv.best_score_)
+score.append(knn_cv.best_score_)
 
 
 #11
@@ -117,7 +123,7 @@ print("accuracy: ",knn_cv.score(X_test,Y_test))
 
 #we can plot the confusion matrix
 yhat = knn_cv.predict(X_test)
-plot_confusion_matrix(Y_test,yhat)
+#plot_confusion_matrix(Y_test,yhat)
 
 #12
 algorithms = {'KNN':knn_cv.best_score_,'Tree':tree_cv.best_score_,'LogisticRegression':logreg_cv.best_score_}
@@ -130,10 +136,15 @@ if bestalgorithm == 'KNN':
 if bestalgorithm == 'LogisticRegression':
     print('Best Params is :',logreg_cv.best_params_)
 
+print("LR score: ")
+print(logreg_cv.best_score_)
+print("SVM score: ")
+print(svm_cv.best_score_)
+print("Tree score: ")
+print(tree_cv.best_score_)
+print("KNN score: ")
+print(knn_cv.best_score_)
 
 
-print("That's all!!!")
-
-
-
-
+plt.plot([0.8464285714285713, 0.8482142857142856, 0.875, knn_cv.best_score_])
+plt.show()

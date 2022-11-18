@@ -51,32 +51,27 @@ def getCoreData(data):
             Legs.append(core['legs'])
             LandingPad.append(core['landpad'])
 
-# spacex_url1="https://api.spacexdata.com/v4/launches/past"
-# spacex_url = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/API_call_spacex_api.json'
-# response = requests.get(spacex_url)
+spacex = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/API_call_spacex_api.json'
+response = requests.get(spacex).json()
 
-static_json_url='https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/API_call_spacex_api.json'
-
-response = requests.get(static_json_url).json()
 data = pd.json_normalize(response)
 
-#  Lets take a subset of our dataframe keeping only the features we want and the flight number, and date_utc.
+# Lets take a subset of our dataframe keeping only the features we want and the flight number, and date_utc.
 data = data[['rocket', 'payloads', 'launchpad', 'cores', 'flight_number', 'date_utc']]
 
-# We will remove rows with multiple cores because those are falcon rockets with 2 extra rocket boosters and rows that have multiple payloads in a single rocket.
+#We will remove rows with multiple cores because those are falcon rockets with 2 extra rocket boosters and rows that have multiple payloads in a single rocket.
 data = data[data['cores'].map(len)==1]
 data = data[data['payloads'].map(len)==1]
 
-# Since payloads and cores are lists of size 1 we will also extract the single value in the list and replace the feature.
+#Since payloads and cores are lists of size 1 we will also extract the single value in the list and replace the feature.
 data['cores'] = data['cores'].map(lambda x : x[0])
 data['payloads'] = data['payloads'].map(lambda x : x[0])
 
-# We also want to convert the date_utc to a datetime datatype and then extracting the date leaving the time
+#We also want to convert the date_utc to a datetime datatype and then extracting the date leaving the time
 data['date'] = pd.to_datetime(data['date_utc']).dt.date
 
-# Using the date we will restrict the dates of the launches
+#Using the date we will restrict the dates of the launches
 data = data[data['date'] <= datetime.date(2020, 11, 13)]
-
 
 #Global variables 
 BoosterVersion = []
@@ -95,19 +90,10 @@ Serial = []
 Longitude = []
 Latitude = []
 
-# Call getBoosterVersion
 getBoosterVersion(data)
-
-#now take a look at the updated, earlier empty list BoosterVersion
 BoosterVersion[0:5]
-
-# Call getLaunchSite
 getLaunchSite(data)
-
-# Call getPayloadData
 getPayloadData(data)
-
-# Call getCoreData
 getCoreData(data)
 
 #construct the dataset using the data we have obtained. The result is a dictionary
